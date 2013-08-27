@@ -81,20 +81,19 @@ function insertAtCursor(myField, myValue/*added(*/,offset/*)*/) {
     }
 }
 //END3
-document.getElementsByAttribute = function(a,b)
+getElementsByAttribute = function(a,b)
 {
 	var output = [],j=0;
 	//from here to END4 the code is from:
 	//http://stackoverflow.com/questions/8396541/javascript-to-get-elements-by-its-attribute
 	var arr_elms = [];
-	arr_elms = document.body.getElementsByTagName("*");
+	arr_elms = document.getElementsByTagName("pre");
 	var elms_len = arr_elms.length;
 	for (var i = 0; i < elms_len; i++) {
 		if(arr_elms[i].getAttribute(a) == b)//changed this line to suite my needs from:
 		//if(arr_elms[i].getAttribute("someAttribute") != null)
 		{
 			output[j++] = arr_elms[i]//changed this line to suite my needs from:
-			//alert("FOUND : " + arr_elms[i].getAttribute("someAttribute"));
 		}
 	}
 	//END4
@@ -123,15 +122,6 @@ checkActors = function()
 		//callActors[fline[curActor]]=1;
 		callActors[aParsedCommands[curCommand][1]] = (style.margin+style.cols.minlen)/2+style.colspacing*curActor;
 		curActor++;
-	}
-}
-themeCheck = function(cust,def)
-{
-	var i=0;
-	for(i in def)
-	{
-		if(!cust[i])cust[i] = def[i];
-		else if(typeof(cust[i])==typeof(Object()))themeCheck(cust[i],def[i])
 	}
 }
 draw = function(el)
@@ -438,7 +428,7 @@ draw = function(el)
 }
 window.onload = function()
 {
-	callflows = document.getElementsByAttribute("callflow","true");
+	callflows = getElementsByAttribute("callflow","true");
 	for(var i = 0, max = callflows.length; i < max; i++)
 	{
 		draw(callflows[i]);
