@@ -1,7 +1,6 @@
-/* DOKUWIKI:include_once raphael.js */
+/* DOKUWIKI:include raphael.js */
 
-
-style = 
+;style = 
 {
 	margin:70,
 	txtsize:15,
@@ -56,31 +55,8 @@ var replaceHtmlEntites = (function() {
 if (!String.prototype.trim) String.prototype.trim = function(){return this.replace(/^\s+|\s+$/g, '');};
 String.prototype.ltrim = function(){return this.replace(/^\s+/,'');};
 String.prototype.rtrim = function(){return this.replace(/\s+$/,'');};
-//END2
-//from here to END3 the code is from:
-//http://stackoverflow.com/questions/11076975/insert-text-into-textarea-at-cursor-position-javascript
-function insertAtCursor(myField, myValue/*added(*/,offset/*)*/) {
-    /*added(*/if(!offset)offset=0/*)*/
-    //IE support
-    if (document.selection) {
-        myField.focus();
-        sel = document.selection.createRange();
-        sel.text = myValue;
-    }
-    //MOZILLA and others
-    else if (myField.selectionStart || myField.selectionStart == '0') {
-        var startPos = myField.selectionStart;
-        var endPos = myField.selectionEnd;
-        myField.value = myField.value.substring(0, startPos)
-            + myValue
-            + myField.value.substring(endPos, myField.value.length);
-	myField.selectionStart = startPos + myValue.length/*added(*/-offset/*)*/; 
-	myField.selectionEnd = startPos + myValue.length/*added(*/-offset/*)*/;
-    } else {
-        myField.value += myValue;
-    }
-}
 //END3
+
 getElementsByAttribute = function(a,b)
 {
 	var output = [],j=0;
@@ -98,13 +74,14 @@ getElementsByAttribute = function(a,b)
 	}
 	//END4
 	return output;
-}
+};
+
 String.prototype.ssplit = function(by)
 {
 	posDelimiter = this.indexOf(by);
 	if(posDelimiter>0)return [this.substring(0, posDelimiter),this.substring(posDelimiter+by.length)];
 	else return [this];
-}
+};
 checkActors = function()
 {
 	aParsedCommands[curCommand][0]+=" ";
@@ -123,7 +100,8 @@ checkActors = function()
 		callActors[aParsedCommands[curCommand][1]] = (style.margin+style.cols.minlen)/2+style.colspacing*curActor;
 		curActor++;
 	}
-}
+};
+
 draw = function(el)
 {
 	callCode = el.innerHTML;
@@ -149,13 +127,6 @@ draw = function(el)
 	for(i = 0; i < aCommands.length; i++)
 	{
 		if(aCommands[i].match(/^\/\//)) continue;      //comment
-			
-		//arrows:0-actorA, 1-actorB, 2-text
-		//all:3-commandType, 4-real line
-		/*
-		var myString = "abc<>bc:123";
-		var myRegexp = /^(.+) ?<-?> ?([^:]+):?(.*)/g;
-		var match = myRegexp.exec(myString);*/
 		
 		if(bInNote)//if in note it would not execute commands
 		{
@@ -358,13 +329,13 @@ draw = function(el)
 			
 			else if(style.note.align=="right")t.attr({"x":BB.x+BB.width,"text-anchor":"end"});//right align
 			
-	/*rect	*/	paper.rect(
+			paper.rect(
 				BB.x-style.note.margin,
 				BB.y-style.note.margin,
 				BB.width+style.note.margin*2,
 				BB.height+style.note.margin*2,
 				style.note.rectradius)
-				.attr("fill",style.note.fill)
+				.attr("fill",style.note.fill);
 			t.toFront();//gets the text in front of the rect
 			y += noteHeight+style.txtsize;
 		}
@@ -409,10 +380,12 @@ draw = function(el)
 			"L"+(breaks[i][1]?(maxx+style.margin):(maxx+style.margin-style.cols.minlen/2))+","+breaks[i][0]) // to
 		.attr({"stroke-dasharray":"--", "stroke-width":style.strokewidth, "stroke":style.strokecolor});
 		if(breaks[i][1])
+		{
 			paper.text(10,
 				breaks[i][0]-style.txtsize/2,
 				breaks[i][1])
-				.attr({"font-size":style.txtsize,"text-anchor":"start","fill":style.txtcolor})
+				.attr({"font-size":style.txtsize,"text-anchor":"start","fill":style.txtcolor});
+		}
 	}
 	if(title)//draw title
 	{
@@ -424,8 +397,9 @@ draw = function(el)
 	paper.rect(0,  0,  maxx+style.margin,  y+(style.cols.height+20))
 		.attr({"fill":style.bgr, "stroke-dasharray":"."}).toBack();//dashed border
 	paper.setSize(maxx+style.margin,y+(style.cols.height+20))//resize paper so it fits
+	
 		
-}
+};
 window.onload = function()
 {
 	callflows = getElementsByAttribute("callflow","true");
@@ -433,4 +407,4 @@ window.onload = function()
 	{
 		draw(callflows[i]);
 	}
-}
+};
