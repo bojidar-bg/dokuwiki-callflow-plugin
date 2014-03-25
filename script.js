@@ -25,6 +25,13 @@
 		rectradius:5,
 		fill:"180-#FFFFCC-#FFFFFF",
 		align:"center"
+	},
+	tooltip:
+	{
+		txtsize:12,
+		txtcolor:"#000",
+		border:"#FFFF99",
+		bgr:"#FFFF99"
 	}
 };
 
@@ -32,6 +39,28 @@
 iconfolder = "./lib/plugins/callflow";//would start at docuwiki/
 var paper,typenum=-1;
 var callActors = [];
+
+Raphael.el.tooltip = function (paper,x,y,text) {
+  this.bb = paper.text((x+x/4),(y-y/16),text).attr({"font-size":style.tooltip.txtsize,"fill":style.tooltip.txtcolor});
+  BB = this.bb.getBBox();
+  this.tp = paper.rect(BB.x-4,BB.y-2,BB.width+8,BB.height+4).attr({"fill":style.tooltip.bgr,"stroke":style.tooltip.border});
+  this.tp.ox = 0;
+  this.tp.oy = 0;
+  this.tp.hide();
+  this.bb.hide();
+  this.hover(
+    function(event) { 
+      this.tp.show().toFront();
+      this.bb.show().toFront();
+    }, 
+    function(event) {
+      this.tp.hide();
+      this.bb.hide();
+    }
+  );
+  return this;
+};
+
 //from here to END1 the code is from:
 //http://stackoverflow.com/questions/1229518/javascript-regex-replace-html-chars
 var replaceHtmlEntites = (function() {
@@ -141,23 +170,23 @@ draw = function(el)
 			else continue;
 		}
 		//----------------------------------------------arrows
-		else if(matched = aCommands[i].match(/^(.+)<-?>([^:]+):?(.*)/))     //double arrow
+		else if(matched = aCommands[i].match(/^(.+)<-?>([^:]+):?([^:]+):?(.*)/))     //double arrow
 		{
-			aParsedCommands[curCommand] = [matched[1], matched[2], matched[3], "double-arrow", i];
+			aParsedCommands[curCommand] = [matched[1], matched[2], matched[3], matched[4], "double-arrow", i];
 			
 			checkActors();
 			curCommand++;
 		}
-		else if(matched = aCommands[i].match(/^(.+)->([^:]+):?(.*)/))       //arrow
+		else if(matched = aCommands[i].match(/^(.+)->([^:]+):?([^:]+):?(.*)/))       //arrow
 		{
-			aParsedCommands[curCommand] = [matched[1], matched[2], matched[3], "arrow", i];
+			aParsedCommands[curCommand] = [matched[1], matched[2], matched[3], matched[4], "arrow", i];
 			
 			checkActors();
 			curCommand++;
 		}
-		else if(matched = aCommands[i].match(/^(.+)<-([^:]+):?(.*)/))       //back arrow
+		else if(matched = aCommands[i].match(/^(.+)<-([^:]+):?([^:]+):?(.*)/))       //back arrow
 		{
-			aParsedCommands[curCommand] = [matched[2], matched[1], matched[3], "arrow", i];
+			aParsedCommands[curCommand] = [matched[2], matched[1], matched[3], matched[4], "arrow", i];
 			
 			checkActors();
 			curCommand++;
@@ -227,7 +256,7 @@ draw = function(el)
 	{
 		bShouldIncrement = 1;
 		cmd = aParsedCommands[i];
-		if(cmd[3]=="arrow")
+		if(cmd[4]=="arrow")
 		{
 			paper.path(
 				"M"+callActors[cmd[0]]+","+y+ // from
@@ -241,13 +270,18 @@ draw = function(el)
 				(callActors[cmd[0]]+callActors[cmd[1]])/2,
 				 y-style.txtsize/2-2,
 				cmd[2]
+			).tooltip(		//show text tooltip on hover
+				paper,
+				(callActors[cmd[0]]+callActors[cmd[1]])/2,
+				y-style.txtsize/2-2,
+				cmd[3]
 			).attr({
 				"font-size":style.txtsize,
 				"fill":style.txtcolor
 			}).getBBox();
 			paper.rect(BB.x,BB.y,BB.width,BB.height).attr({"stroke":"none","fill":style.bgr}).toBack();//background box
 		}
-		else if(cmd[3]=="double-arrow")
+		else if(cmd[4]=="double-arrow")
 		{
 			paper.path(
 				"M"+callActors[cmd[0]]+","+y+ // from
@@ -269,6 +303,11 @@ draw = function(el)
 				(callActors[cmd[0]]+callActors[cmd[1]])/2,
 				 y-style.txtsize/2-2,
 				cmd[2]
+			).tooltip(		//show text tooltip on hover
+				paper,
+				(callActors[cmd[0]]+callActors[cmd[1]])/2,
+				y-style.txtsize/2-2,
+				cmd[3]
 			).attr({
 				"font-size":style.txtsize,
 				"fill":style.txtcolor
