@@ -331,7 +331,8 @@ draw = function(el)
 			{
 				for(curCommand = i;curCommand > -1;curCommand--)
 				{
-					if(aParsedCommands[curCommand][3].match("arrow"))
+					if(typeof(aParsedCommands[curCommand][3]) == 'string' &&
+					   aParsedCommands[curCommand][3].match("arrow"))
 					{
 						midx = (callActors[aParsedCommands[curCommand][0]]+callActors[aParsedCommands[curCommand][1]])/2;
 						break;
