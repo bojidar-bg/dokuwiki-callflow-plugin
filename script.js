@@ -41,8 +41,15 @@ var paper,typenum=-1;
 var callActors = [];
 
 Raphael.el.tooltip = function (paper,x,y,text) {
-  this.bb = paper.text((x+x/4),(y-y/16),text).attr({"font-size":style.tooltip.txtsize,"fill":style.tooltip.txtcolor});
-  BB = this.bb.getBBox();
+  // No tooltip if text is empty
+  if (!text) {return this;}
+
+  this.bb = paper.text(x,(y+style.txtsize/2)+10,text).attr({"font-size":style.tooltip.txtsize,"fill":style.tooltip.txtcolor, 'text-anchor': 'start'});
+  var BB = this.bb.getBBox();
+  // Translate of tooltip height/2 for multi line TT
+  // BB.y is automatically updated
+  this.bb.translate(0,BB.height/2);
+
   this.tp = paper.rect(BB.x-4,BB.y-2,BB.width+8,BB.height+4).attr({"fill":style.tooltip.bgr,"stroke":style.tooltip.border});
   this.tp.ox = 0;
   this.tp.oy = 0;
@@ -301,17 +308,42 @@ draw = function(el)
 	{
 		bShouldIncrement = 1;
 		cmd = aParsedCommands[i];
-		if(cmd[4]=="arrow")
+		if(cmd[4] == "arrow" || cmd[4] == "double-arrow")
 		{
-			paper.path(
-				"M"+callActors[cmd[0]]+","+y+ // from
-				"L"+callActors[cmd[1]]+","+y  // to
-			).attr({
-				"arrow-end":"block-wide-long",
-				"stroke-width":style.strokewidth,
-				"stroke":style.strokecolor
-			});
-			BB = paper.text(	//text above arrow
+			// if start and dest are the same, skip the arrow
+			if (cmd[0] != cmd[1]) {
+				// Draw a blank line where the line will be to clearly cut columns marker
+				var adjStart = style.strokewidth/2;
+				var adjEnd = -style.strokewidth/2;
+				if (callActors[cmd[0]] > callActors[cmd[1]]) {
+					adjStart = -style.strokewidth/2;
+					adjEnd = style.strokewidth/2;
+				}
+				paper.path(
+					"M"+(callActors[cmd[0]]+adjStart)+","+y+ // from
+					"L"+(callActors[cmd[1]]+adjEnd)+","+y  // to
+				).attr({
+					"stroke-width":style.strokewidth+5,
+					"stroke":"#ffffff",
+					"stroke-linecap":"butt"
+				});
+
+				// Factorized arrow and double-arrow
+				var arrstart = "none";
+				if (cmd[4] == "double-arrow") {
+					arrstart = "block-wide-long";
+				}
+				paper.path(
+					"M"+callActors[cmd[0]]+","+y+ // from
+					"L"+callActors[cmd[1]]+","+y  // to
+				).attr({
+					"arrow-start":arrstart,
+					"arrow-end":"block-wide-long",
+					"stroke-width":style.strokewidth,
+					"stroke":style.strokecolor
+				});
+			}
+			var txt = paper.text(	//text above arrow
 				(callActors[cmd[0]]+callActors[cmd[1]])/2,
 				 y-style.txtsize/2-2,
 				cmd[2]
@@ -319,45 +351,17 @@ draw = function(el)
 				paper,
 				(callActors[cmd[0]]+callActors[cmd[1]])/2,
 				y-style.txtsize/2-2,
-				cmd[3]
+				cmd[3].replace(/\\n/g,"\n")
 			).attr({
 				"font-size":style.txtsize,
 				"fill":style.txtcolor
-			}).getBBox();
+			});
+			// Add visual hint there is a tooltip
+			if (cmd[3] && txt.node) {
+				jQuery(txt.node).css('text-decoration','underline').css('text-decoration-style','dashed');
+			}
+			var BB = txt.getBBox();
 			paper.rect(BB.x,BB.y,BB.width,BB.height).attr({"stroke":"none","fill":style.bgr}).toBack();//background box
-		}
-		else if(cmd[4]=="double-arrow")
-		{
-			paper.path(
-				"M"+callActors[cmd[0]]+","+y+ // from
-				"L"+callActors[cmd[1]]+","+y  // to
-			).attr({
-				"arrow-end":"block-wide-long",
-				"stroke-width":style.strokewidth,
-				"stroke":style.strokecolor
-			});
-			paper.path(
-				"M"+callActors[cmd[1]]+","+y+ // from
-				"L"+callActors[cmd[0]]+","+y  // to
-			).attr({
-				"arrow-end":"block-wide-long",
-				"stroke-width":style.strokewidth,
-				"stroke":style.strokecolor
-			});
-			BB = paper.text(	//text above arrow
-				(callActors[cmd[0]]+callActors[cmd[1]])/2,
-				 y-style.txtsize/2-2,
-				cmd[2]
-			).tooltip(		//show text tooltip on hover
-				paper,
-				(callActors[cmd[0]]+callActors[cmd[1]])/2,
-				y-style.txtsize/2-2,
-				cmd[3]
-			).attr({
-				"font-size":style.txtsize,
-				"fill":style.txtcolor
-			}).getBBox();
-			paper.rect(BB.x,BB.y,BB.width,BB.height).attr({"stroke":"none","fill":style.bgr}).toBack();
 		}
 		else if(cmd[3]=="parallel-start")
 		{
