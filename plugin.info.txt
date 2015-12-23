@@ -1,7 +1,7 @@
 base   callflow
 author Bojidar Marinov
 email  bojidar.marinov.bg@gmail.com
-date   2013-08-27
+date   2015-12-23
 name   Callflow Diagrams
 desc   Makes callflow diagrams. For an editor see:TODO
 url    https://www.dokuwiki.org/plugin:callflow

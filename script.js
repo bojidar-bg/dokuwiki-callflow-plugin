@@ -228,6 +228,41 @@ draw = function(el)
 		{
 			title = matched[1];
 		}
+		//--- Directive to force order
+		/*
+		 * B<-A still puts A in first position
+		 * order allows to workaround that by having control on where items appear
+		 * ex graph:
+
+		    A
+		 B<-A
+		    A->C
+
+		 * ex code:
+
+		order:B
+		order:A
+		order:C
+		A<>A:do something
+		A->B:ask something
+		A->C:send something
+
+
+		 * or even the following only forces B in the first place, others use natural order:
+		order:B
+		A<>A:do something
+		A->B:ask something
+		A->C:send something
+
+		*/
+		else if(matched = aCommands[i].match(/^order:(.+)/))       //order
+		{
+			aParsedCommands[curCommand] = [matched[1], matched[1], "", "", "", i];
+
+			checkActors();
+			curCommand++;
+		}
+
 	}
 	if(bInNote) aParsedCommands[curCommand] = [0,0,"note-stop",aCommands.length];
 	
