@@ -119,14 +119,14 @@ checkActors = function()
 	{
 		//fline[curActor] = aParsedCommands[curCommand][0];
 		//callActors[fline[curActor]]=1;
-		callActors[aParsedCommands[curCommand][0]] = (style.margin+style.cols.minlen)/2+style.colspacing*curActor;
+		callActors[aParsedCommands[curCommand][0]] = (style.margin+l_colsminlen)/2+l_colspacing*curActor;
 		curActor++;
 	}
 	if(!callActors[aParsedCommands[curCommand][1]]&&aParsedCommands[curCommand][1]!=null)
 	{
 		//fline[curActor] = aParsedCommands[curCommand][1];
 		//callActors[fline[curActor]]=1;
-		callActors[aParsedCommands[curCommand][1]] = (style.margin+style.cols.minlen)/2+style.colspacing*curActor;
+		callActors[aParsedCommands[curCommand][1]] = (style.margin+l_colsminlen)/2+l_colspacing*curActor;
 		curActor++;
 	}
 };
@@ -152,6 +152,9 @@ draw = function(el)
 	curActor = 0;
 	title = "";
 	bInNote = 0;
+	// Local copy of default values
+	l_colsminlen = style.cols.minlen;
+	l_colspacing = style.colspacing;
 //==============================================Parsing==============================================
 	for(i = 0; i < aCommands.length; i++)
 	{
@@ -262,7 +265,14 @@ draw = function(el)
 			checkActors();
 			curCommand++;
 		}
-
+		/* ------ Allow to change colwidth for each callflow tag
+		 * Must be in the first lines, ignored as after first actor is found
+		 */
+		else if(curActor == 0 && (matched = aCommands[i].match(/colwidth:(.+)/)))     //colwidth
+		{
+			l_colsminlen = parseInt(matched[1]);
+			l_colspacing = l_colsminlen + 40;
+		}
 	}
 	if(bInNote) aParsedCommands[curCommand] = [0,0,"note-stop",aCommands.length];
 	
@@ -270,9 +280,9 @@ draw = function(el)
 	for(i in callActors)
 	{
 		paper.rect(
-			callActors[i]-style.cols.minlen/2,// x
+			callActors[i]-l_colsminlen/2,// x
 			20+(title?style.titlesize:0),	// y
-			style.cols.minlen,		// width
+			l_colsminlen,		// width
 			style.cols.height,		// height
 			style.cols.rectradius)		// corner radius
 		.attr("fill",style.cols.fill);
@@ -377,7 +387,7 @@ draw = function(el)
 			else if(cmd[3]=="note-over")
 			{
 				midx = (callActors[cmd[0]]+callActors[cmd[1]])/2;
-				ml = style.colspacing;
+				ml = l_colspacing;
 			}
 			else 
 			{
@@ -428,17 +438,17 @@ draw = function(el)
 		if(bShouldIncrement&&!isParallel)y+=style.linespacing;
 	}
 	y-=style.linespacing-10;
-	maxx=0;
+	cactLen = 0;
 	for(i in callActors)//find max(callActors) and draw bottom rects and paths
 	{
-		maxx = Math.max(callActors[i],maxx);
+		cactLen++;
 		paper.path("M"+callActors[i]+","+y+ // from
 		"L"+callActors[i]+","+(20+(title?style.titlesize:0))) // to
 		.attr("stroke",style.strokecolor).toBack();
 		paper.rect(
-			callActors[i]-style.cols.minlen/2,
+			callActors[i]-l_colsminlen/2,
 			y,
-			style.cols.minlen,
+			l_colsminlen,
 			style.cols.height,
 			style.cols.rectradius)
 			.attr("fill", style.cols.fill);
@@ -448,11 +458,12 @@ draw = function(el)
 			i)
 			.attr({"font-size":style.txtsize, "fill":style.cols.txtcolor});
 	}
+	maxx = cactLen*l_colspacing-style.margin/2;
 	for(i in breaks)//draw breaks
 	{
 		paper.path(
 			"M"+(breaks[i][1]?0:style.margin/2)+","+breaks[i][0]+ // from
-			"L"+(breaks[i][1]?(maxx+style.margin):(maxx+style.margin-style.cols.minlen/2))+","+breaks[i][0]) // to
+			"L"+(breaks[i][1]?(maxx+style.margin):(maxx+style.margin-l_colsminlen/2))+","+breaks[i][0]) // to
 		.attr({"stroke-dasharray":"--", "stroke-width":style.strokewidth, "stroke":style.strokecolor});
 		if(breaks[i][1])
 		{
