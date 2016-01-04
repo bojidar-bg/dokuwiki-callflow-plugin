@@ -41,8 +41,15 @@ var paper,typenum=-1;
 var callActors = [];
 
 Raphael.el.tooltip = function (paper,x,y,text) {
-  this.bb = paper.text((x+x/4),(y-y/16),text).attr({"font-size":style.tooltip.txtsize,"fill":style.tooltip.txtcolor});
-  BB = this.bb.getBBox();
+  // No tooltip if text is empty
+  if (!text) {return this;}
+
+  this.bb = paper.text(x,(y+style.txtsize/2)+10,text).attr({"font-size":style.tooltip.txtsize,"fill":style.tooltip.txtcolor, 'text-anchor': 'start'});
+  var BB = this.bb.getBBox();
+  // Translate of tooltip height/2 for multi line TT
+  // BB.y is automatically updated
+  this.bb.translate(0,BB.height/2);
+
   this.tp = paper.rect(BB.x-4,BB.y-2,BB.width+8,BB.height+4).attr({"fill":style.tooltip.bgr,"stroke":style.tooltip.border});
   this.tp.ox = 0;
   this.tp.oy = 0;
@@ -119,14 +126,14 @@ checkActors = function()
 	{
 		//fline[curActor] = aParsedCommands[curCommand][0];
 		//callActors[fline[curActor]]=1;
-		callActors[aParsedCommands[curCommand][0]] = (style.margin+style.cols.minlen)/2+style.colspacing*curActor;
+		callActors[aParsedCommands[curCommand][0]] = (style.margin+l_colsminlen)/2+l_colspacing*curActor;
 		curActor++;
 	}
 	if(!callActors[aParsedCommands[curCommand][1]]&&aParsedCommands[curCommand][1]!=null)
 	{
 		//fline[curActor] = aParsedCommands[curCommand][1];
 		//callActors[fline[curActor]]=1;
-		callActors[aParsedCommands[curCommand][1]] = (style.margin+style.cols.minlen)/2+style.colspacing*curActor;
+		callActors[aParsedCommands[curCommand][1]] = (style.margin+l_colsminlen)/2+l_colspacing*curActor;
 		curActor++;
 	}
 };
@@ -152,6 +159,9 @@ draw = function(el)
 	curActor = 0;
 	title = "";
 	bInNote = 0;
+	// Local copy of default values
+	l_colsminlen = style.cols.minlen;
+	l_colspacing = style.colspacing;
 //==============================================Parsing==============================================
 	for(i = 0; i < aCommands.length; i++)
 	{
@@ -228,6 +238,48 @@ draw = function(el)
 		{
 			title = matched[1];
 		}
+		//--- Directive to force order
+		/*
+		 * B<-A still puts A in first position
+		 * order allows to workaround that by having control on where items appear
+		 * ex graph:
+
+		    A
+		 B<-A
+		    A->C
+
+		 * ex code:
+
+		order:B
+		order:A
+		order:C
+		A<>A:do something
+		A->B:ask something
+		A->C:send something
+
+
+		 * or even the following only forces B in the first place, others use natural order:
+		order:B
+		A<>A:do something
+		A->B:ask something
+		A->C:send something
+
+		*/
+		else if(matched = aCommands[i].match(/^order:(.+)/))       //order
+		{
+			aParsedCommands[curCommand] = [matched[1], matched[1], "", "", "", i];
+
+			checkActors();
+			curCommand++;
+		}
+		/* ------ Allow to change colwidth for each callflow tag
+		 * Must be in the first lines, ignored as after first actor is found
+		 */
+		else if(curActor == 0 && (matched = aCommands[i].match(/colwidth:(.+)/)))     //colwidth
+		{
+			l_colsminlen = parseInt(matched[1]);
+			l_colspacing = l_colsminlen + 40;
+		}
 	}
 	if(bInNote) aParsedCommands[curCommand] = [0,0,"note-stop",aCommands.length];
 
@@ -235,9 +287,9 @@ draw = function(el)
 	for(i in callActors)
 	{
 		paper.rect(
-			callActors[i]-style.cols.minlen/2,// x
+			callActors[i]-l_colsminlen/2,// x
 			20+(title?style.titlesize:0),	// y
-			style.cols.minlen,		// width
+			l_colsminlen,		// width
 			style.cols.height,		// height
 			style.cols.rectradius)		// corner radius
 		.attr("fill",style.cols.fill);
@@ -256,17 +308,42 @@ draw = function(el)
 	{
 		bShouldIncrement = 1;
 		cmd = aParsedCommands[i];
-		if(cmd[4]=="arrow")
+		if(cmd[4] == "arrow" || cmd[4] == "double-arrow")
 		{
-			paper.path(
-				"M"+callActors[cmd[0]]+","+y+ // from
-				"L"+callActors[cmd[1]]+","+y  // to
-			).attr({
-				"arrow-end":"block-wide-long",
-				"stroke-width":style.strokewidth,
-				"stroke":style.strokecolor
-			});
-			BB = paper.text(	//text above arrow
+			// if start and dest are the same, skip the arrow
+			if (cmd[0] != cmd[1]) {
+				// Draw a blank line where the line will be to clearly cut columns marker
+				var adjStart = style.strokewidth/2;
+				var adjEnd = -style.strokewidth/2;
+				if (callActors[cmd[0]] > callActors[cmd[1]]) {
+					adjStart = -style.strokewidth/2;
+					adjEnd = style.strokewidth/2;
+				}
+				paper.path(
+					"M"+(callActors[cmd[0]]+adjStart)+","+y+ // from
+					"L"+(callActors[cmd[1]]+adjEnd)+","+y  // to
+				).attr({
+					"stroke-width":style.strokewidth+5,
+					"stroke":"#ffffff",
+					"stroke-linecap":"butt"
+				});
+
+				// Factorized arrow and double-arrow
+				var arrstart = "none";
+				if (cmd[4] == "double-arrow") {
+					arrstart = "block-wide-long";
+				}
+				paper.path(
+					"M"+callActors[cmd[0]]+","+y+ // from
+					"L"+callActors[cmd[1]]+","+y  // to
+				).attr({
+					"arrow-start":arrstart,
+					"arrow-end":"block-wide-long",
+					"stroke-width":style.strokewidth,
+					"stroke":style.strokecolor
+				});
+			}
+			var txt = paper.text(	//text above arrow
 				(callActors[cmd[0]]+callActors[cmd[1]])/2,
 				 y-style.txtsize/2-2,
 				cmd[2]
@@ -274,45 +351,17 @@ draw = function(el)
 				paper,
 				(callActors[cmd[0]]+callActors[cmd[1]])/2,
 				y-style.txtsize/2-2,
-				cmd[3]
+				cmd[3].replace(/\\n/g,"\n")
 			).attr({
 				"font-size":style.txtsize,
 				"fill":style.txtcolor
-			}).getBBox();
+			});
+			// Add visual hint there is a tooltip
+			if (cmd[3] && txt.node) {
+				jQuery(txt.node).css('text-decoration','underline').css('text-decoration-style','dashed');
+			}
+			var BB = txt.getBBox();
 			paper.rect(BB.x,BB.y,BB.width,BB.height).attr({"stroke":"none","fill":style.bgr}).toBack();//background box
-		}
-		else if(cmd[4]=="double-arrow")
-		{
-			paper.path(
-				"M"+callActors[cmd[0]]+","+y+ // from
-				"L"+callActors[cmd[1]]+","+y  // to
-			).attr({
-				"arrow-end":"block-wide-long",
-				"stroke-width":style.strokewidth,
-				"stroke":style.strokecolor
-			});
-			paper.path(
-				"M"+callActors[cmd[1]]+","+y+ // from
-				"L"+callActors[cmd[0]]+","+y  // to
-			).attr({
-				"arrow-end":"block-wide-long",
-				"stroke-width":style.strokewidth,
-				"stroke":style.strokecolor
-			});
-			BB = paper.text(	//text above arrow
-				(callActors[cmd[0]]+callActors[cmd[1]])/2,
-				 y-style.txtsize/2-2,
-				cmd[2]
-			).tooltip(		//show text tooltip on hover
-				paper,
-				(callActors[cmd[0]]+callActors[cmd[1]])/2,
-				y-style.txtsize/2-2,
-				cmd[3]
-			).attr({
-				"font-size":style.txtsize,
-				"fill":style.txtcolor
-			}).getBBox();
-			paper.rect(BB.x,BB.y,BB.width,BB.height).attr({"stroke":"none","fill":style.bgr}).toBack();
 		}
 		else if(cmd[3]=="parallel-start")
 		{
@@ -342,7 +391,7 @@ draw = function(el)
 			else if(cmd[3]=="note-over")
 			{
 				midx = (callActors[cmd[0]]+callActors[cmd[1]])/2;
-				ml = style.colspacing;
+				ml = l_colspacing;
 			}
 			else
 			{
@@ -393,17 +442,17 @@ draw = function(el)
 		if(bShouldIncrement&&!isParallel)y+=style.linespacing;
 	}
 	y-=style.linespacing-10;
-	maxx=0;
+	cactLen = 0;
 	for(i in callActors)//find max(callActors) and draw bottom rects and paths
 	{
-		maxx = Math.max(callActors[i],maxx);
+		cactLen++;
 		paper.path("M"+callActors[i]+","+y+ // from
 		"L"+callActors[i]+","+(20+(title?style.titlesize:0))) // to
 		.attr("stroke",style.strokecolor).toBack();
 		paper.rect(
-			callActors[i]-style.cols.minlen/2,
+			callActors[i]-l_colsminlen/2,
 			y,
-			style.cols.minlen,
+			l_colsminlen,
 			style.cols.height,
 			style.cols.rectradius)
 			.attr("fill", style.cols.fill);
@@ -413,11 +462,12 @@ draw = function(el)
 			i)
 			.attr({"font-size":style.txtsize, "fill":style.cols.txtcolor});
 	}
+	maxx = cactLen*l_colspacing-style.margin/2;
 	for(i in breaks)//draw breaks
 	{
 		paper.path(
 			"M"+(breaks[i][1]?0:style.margin/2)+","+breaks[i][0]+ // from
-			"L"+(breaks[i][1]?(maxx+style.margin):(maxx+style.margin-style.cols.minlen/2))+","+breaks[i][0]) // to
+			"L"+(breaks[i][1]?(maxx+style.margin):(maxx+style.margin-l_colsminlen/2))+","+breaks[i][0]) // to
 		.attr({"stroke-dasharray":"--", "stroke-width":style.strokewidth, "stroke":style.strokecolor});
 		if(breaks[i][1])
 		{
