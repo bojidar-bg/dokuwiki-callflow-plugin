@@ -1,6 +1,6 @@
 /* DOKUWIKI:include raphael.js */
 
-;style = 
+;style =
 {
 	margin:70,
 	txtsize:15,
@@ -49,10 +49,10 @@ Raphael.el.tooltip = function (paper,x,y,text) {
   this.tp.hide();
   this.bb.hide();
   this.hover(
-    function(event) { 
+    function(event) {
       this.tp.show().toFront();
       this.bb.show().toFront();
-    }, 
+    },
     function(event) {
       this.tp.hide();
       this.bb.hide();
@@ -66,15 +66,15 @@ Raphael.el.tooltip = function (paper,x,y,text) {
 var replaceHtmlEntites = (function() {
   var translate_re = /&(nbsp|amp|quot|lt|gt);/g;
   var translate = {
-    "nbsp": " ", 
-    "amp" : "&", 
+    "nbsp": " ",
+    "amp" : "&",
     "quot": "\"",
-    "lt"  : "<", 
+    "lt"  : "<",
     "gt"  : ">"
   };
   return function(s) {
-    return ( s.replace(translate_re, function(match, entity) { 
-      return translate[entity]; 
+    return ( s.replace(translate_re, function(match, entity) {
+      return translate[entity];
     }) );
   }
 })();
@@ -137,15 +137,15 @@ draw = function(el)
 	callCode = replaceHtmlEntites(callCode.replace(/<br>/gi,"\n"));
 	callCode = callCode.replace(/\n[\n]+/gm,"\n");
 	aCommands = callCode.split("\n");
-	
+
 	el.style.clear = "both";
 	el.innerHTML = "";
-	
+
 	delete paper;
 	paper = Raphael(el,0,0);
-	
+
 	callActors = [];
-	
+
 	callActors = [];
 	aParsedCommands = [];
 	curCommand = 0;
@@ -156,7 +156,7 @@ draw = function(el)
 	for(i = 0; i < aCommands.length; i++)
 	{
 		if(aCommands[i].match(/^\/\//)) continue;      //comment
-		
+
 		if(bInNote)//if in note it would not execute commands
 		{
 			if(matched = aCommands[i].match(/^\)/))//note stop
@@ -173,21 +173,21 @@ draw = function(el)
 		else if(matched = aCommands[i].match(/^(.+)<-?>([^:]+):?([^:]+):?(.*)/))     //double arrow
 		{
 			aParsedCommands[curCommand] = [matched[1], matched[2], matched[3], matched[4], "double-arrow", i];
-			
+
 			checkActors();
 			curCommand++;
 		}
 		else if(matched = aCommands[i].match(/^(.+)->([^:]+):?([^:]+):?(.*)/))       //arrow
 		{
 			aParsedCommands[curCommand] = [matched[1], matched[2], matched[3], matched[4], "arrow", i];
-			
+
 			checkActors();
 			curCommand++;
 		}
 		else if(matched = aCommands[i].match(/^(.+)<-([^:]+):?([^:]+):?(.*)/))       //back arrow
 		{
 			aParsedCommands[curCommand] = [matched[2], matched[1], matched[3], matched[4], "arrow", i];
-			
+
 			checkActors();
 			curCommand++;
 		}
@@ -230,7 +230,7 @@ draw = function(el)
 		}
 	}
 	if(bInNote) aParsedCommands[curCommand] = [0,0,"note-stop",aCommands.length];
-	
+
 //==============================================Drawing==============================================
 	for(i in callActors)
 	{
@@ -241,7 +241,7 @@ draw = function(el)
 			style.cols.height,		// height
 			style.cols.rectradius)		// corner radius
 		.attr("fill",style.cols.fill);
-		
+
 		paper.text(callActors[i],		// center x
 			   5+style.cols.height+(title?style.titlesize:0),// center y
 			   i)				// text
@@ -331,8 +331,8 @@ draw = function(el)
 			{
 				for(curCommand = i;curCommand > -1;curCommand--)
 				{
-					if(typeof(aParsedCommands[curCommand][3]) == 'string' &&
-					   aParsedCommands[curCommand][3].match("arrow"))
+					if(typeof(aParsedCommands[curCommand][4]) == 'string' &&
+					   aParsedCommands[curCommand][4].match("arrow"))
 					{
 						midx = (callActors[aParsedCommands[curCommand][0]]+callActors[aParsedCommands[curCommand][1]])/2;
 						break;
@@ -344,7 +344,7 @@ draw = function(el)
 				midx = (callActors[cmd[0]]+callActors[cmd[1]])/2;
 				ml = style.colspacing;
 			}
-			else 
+			else
 			{
 				midx = callActors[cmd[1]];
 			}
@@ -364,11 +364,11 @@ draw = function(el)
 			if(!note)continue;//if there is no text it won't draw anything
 			t = paper.text(midx,y+noteHeight/2,note).attr("font-size",style.txtsize);//text
 			BB = t.getBBox();//bounding box
-			
+
 			if(!style.note.align||style.note.align=="left")t.attr({"x":BB.x,"text-anchor":"start"});//left align
-			
+
 			else if(style.note.align=="right")t.attr({"x":BB.x+BB.width,"text-anchor":"end"});//right align
-			
+
 			paper.rect(
 				BB.x-style.note.margin,
 				BB.y-style.note.margin,
@@ -437,8 +437,8 @@ draw = function(el)
 	paper.rect(0,  0,  maxx+style.margin,  y+(style.cols.height+20))
 		.attr({"fill":style.bgr, "stroke-dasharray":"."}).toBack();//dashed border
 	paper.setSize(maxx+style.margin,y+(style.cols.height+20))//resize paper so it fits
-	
-		
+
+
 };
 window.onload = function()
 {
