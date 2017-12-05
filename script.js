@@ -28,10 +28,10 @@
 	},
 	tooltip:
 	{
-		txtsize:12,
-		txtcolor:"#000",
-		border:"#FFFF99",
-		bgr:"#FFFF99"
+		txtsize:JSINFO['plugin_callflow']['tooltip_txtsize'],
+		txtcolor:JSINFO['plugin_callflow']['tooltip_txtcolor'],
+		border:JSINFO['plugin_callflow']['tooltip_border'],
+		bgr:JSINFO['plugin_callflow']['tooltip_background']
 	}
 };
 
