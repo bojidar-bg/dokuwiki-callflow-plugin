@@ -13,18 +13,18 @@
 	bgr:JSINFO['plugin_callflow']['bgr'],
 	cols:
 	{
-		minlen:80,
-		height:30,
-		rectradius:0,
-		fill:"#FFF",
-		txtcolor:"#000"
+		minlen:JSINFO['plugin_callflow']['cols_minlen'],
+		height:JSINFO['plugin_callflow']['cols_height'],
+		rectradius:JSINFO['plugin_callflow']['cols_rectradius'],
+		fill:JSINFO['plugin_callflow']['cols_fill'],
+		txtcolor:JSINFO['plugin_callflow']['cols_txtcolor']
 	},
 	note:
 	{
-		margin:8,
-		rectradius:5,
-		fill:"180-#FFFFCC-#FFFFFF",
-		align:"center"
+		margin:JSINFO['plugin_callflow']['note_margin'],
+		rectradius:JSINFO['plugin_callflow']['note_rectradius'],
+		fill:JSINFO['plugin_callflow']['note_fill'],
+		align:JSINFO['plugin_callflow']['note_align']
 	},
 	tooltip:
 	{
