@@ -2,15 +2,15 @@
 
 ;style =
 {
-	margin:70,
-	txtsize:15,
-	titlesize:20,
-	linespacing:30,//note: MUST be bigger than txtsize
-	colspacing:120,
-	strokewidth:1.5,//for arrows and breaks
-	strokecolor:"#000",
-	txtcolor:"#000",
-	bgr:"#FFF",
+	margin:JSINFO['plugin_callflow']['margin'],
+	txtsize:JSINFO['plugin_callflow']['txtsize'] ,
+	titlesize:JSINFO['plugin_callflow']['titlesize'],
+	linespacing:JSINFO['plugin_callflow']['linespacing'],//note: MUST be bigger than txtsize
+	colspacing:JSINFO['plugin_callflow']['colspacing'],
+	strokewidth:JSINFO['plugin_callflow']['strokewidth'],//for arrows and breaks
+	strokecolor:JSINFO['plugin_callflow']['strokecolor'] ,
+	txtcolor:JSINFO['plugin_callflow']['txtcolor'] ,
+	bgr:JSINFO['plugin_callflow']['bgr'],
 	cols:
 	{
 		minlen:80,
