@@ -2,36 +2,36 @@
 
 ;style =
 {
-	margin:70,
-	txtsize:15,
-	titlesize:20,
-	linespacing:30,//note: MUST be bigger than txtsize
-	colspacing:120,
-	strokewidth:1.5,//for arrows and breaks
-	strokecolor:"#000",
-	txtcolor:"#000",
-	bgr:"#FFF",
+	margin:JSINFO['plugin_callflow']['margin'],
+	txtsize:JSINFO['plugin_callflow']['txtsize'] ,
+	titlesize:JSINFO['plugin_callflow']['titlesize'],
+	linespacing:JSINFO['plugin_callflow']['linespacing'],//note: MUST be bigger than txtsize
+	colspacing:JSINFO['plugin_callflow']['colspacing'],
+	strokewidth:JSINFO['plugin_callflow']['strokewidth'],//for arrows and breaks
+	strokecolor:JSINFO['plugin_callflow']['strokecolor'] ,
+	txtcolor:JSINFO['plugin_callflow']['txtcolor'] ,
+	bgr:JSINFO['plugin_callflow']['bgr'],
 	cols:
 	{
-		minlen:80,
-		height:30,
-		rectradius:0,
-		fill:"#FFF",
-		txtcolor:"#000"
+		minlen:JSINFO['plugin_callflow']['cols_minlen'],
+		height:JSINFO['plugin_callflow']['cols_height'],
+		rectradius:JSINFO['plugin_callflow']['cols_rectradius'],
+		fill:JSINFO['plugin_callflow']['cols_fill'],
+		txtcolor:JSINFO['plugin_callflow']['cols_txtcolor']
 	},
 	note:
 	{
-		margin:8,
-		rectradius:5,
-		fill:"180-#FFFFCC-#FFFFFF",
-		align:"center"
+		margin:JSINFO['plugin_callflow']['note_margin'],
+		rectradius:JSINFO['plugin_callflow']['note_rectradius'],
+		fill:JSINFO['plugin_callflow']['note_fill'],
+		align:JSINFO['plugin_callflow']['note_align']
 	},
 	tooltip:
 	{
-		txtsize:12,
-		txtcolor:"#000",
-		border:"#FFFF99",
-		bgr:"#FFFF99"
+		txtsize:JSINFO['plugin_callflow']['tooltip_txtsize'],
+		txtcolor:JSINFO['plugin_callflow']['tooltip_txtcolor'],
+		border:JSINFO['plugin_callflow']['tooltip_border'],
+		bgr:JSINFO['plugin_callflow']['tooltip_background']
 	}
 };
 
